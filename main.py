@@ -1,18 +1,16 @@
 from wlan import connect_wifi
 import uasyncio as asyncio
-from mqtt import connect_mqtt, publish_message, mqtt_loop
+from mqtt import connect_mqtt, publish_status, mqtt_loop
 
 async def main():
     connect_wifi()  # Conectar a la red WiFi
     await connect_mqtt()  # Conectar al broker MQTT
 
-    # Publicar mensajes periódicamente
-    n = 0
-    while True:
-        mensaje = f"Contador: {n}"
-        await publish_message('casa/habitacion/temperatura', mensaje, qos=1)  # Publicar en el tópico 'result'
-        n += 1
-        await asyncio.sleep(10)  # Esperar 10 segundos
+    # Iniciar la publicación periódica de parámetros
+    asyncio.create_task(publish_status())
+
+    # Mantener la conexión activa
+    await mqtt_loop()
 
 # Ejecutar el programa
 asyncio.run(main())
