@@ -2,26 +2,34 @@ import network
 import time
 from settings import SSID, password
 
-def connect_wifi():
+def conectar_wifi():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    wlan.config(pm = 0xa11140)   # Disable power-save mode
     wlan.connect(SSID, password)
-
+    print("Conectando a WiFi...")
     max_wait = 10
     while max_wait > 0:
         if wlan.status() < 0 or wlan.status() >= 3:
             break
         max_wait -= 1
-        print('waiting for connection...')
+        print("Esperando conexion...")
         time.sleep(1)
-
-    # Handle connection error
     if wlan.status() != 3:
-        raise RuntimeError('network connection failed')
-    else:
-        print('connected')
-        status = wlan.ifconfig()
-        print( 'ip = ' + status[0] )
+        raise RuntimeError("Error en la conexion de red")
+    print("Conectado a WiFi")
+    print("Direccion IP:", wlan.ifconfig()[0])
+    return wlan
 
-    print('Datos de la red: ', wlan.ifconfig())
+
+### mqtt.py
+from mqtt_as import MQTTClient, config
+from settings import BROKER, SSID, password
+
+config["server"] = BROKER
+config["ssid"] = SSID
+config["wifi_pw"] = password
+
+client = MQTTClient(config)
+
+def iniciar_mqtt():
+    return client
